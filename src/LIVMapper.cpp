@@ -16,18 +16,22 @@ LIVMapper::LIVMapper(ros::NodeHandle &nh)
     : extT(0, 0, 0),
       extR(M3D::Identity())
 {
+  // step: 1 外参初始化
   extrinT.assign(3, 0.0);
   extrinR.assign(9, 0.0);
   cameraextrinT.assign(3, 0.0);
   cameraextrinR.assign(9, 0.0);
 
+  // step: 2 preprocess + imu_process 重置
   p_pre.reset(new Preprocess());
   p_imu.reset(new ImuProcess());
 
+  // step: 3 读取相关参数
   readParameters(nh);
   VoxelMapConfig voxel_config;
   loadVoxelConfig(nh, voxel_config);
 
+  // step: 4 点云重置
   visual_sub_map.reset(new PointCloudXYZI());
   feats_undistort.reset(new PointCloudXYZI());
   feats_down_body.reset(new PointCloudXYZI());
@@ -36,6 +40,8 @@ LIVMapper::LIVMapper(ros::NodeHandle &nh)
   pcl_wait_pub.reset(new PointCloudXYZI());
   pcl_wait_save.reset(new PointCloudXYZRGB());
   pcl_wait_save_intensity.reset(new PointCloudXYZI());
+
+  // step: 5 voxel_map + vio 重置
   voxelmap_manager.reset(new VoxelMapManager(voxel_config, voxel_map));
   vio_manager.reset(new VIOManager());
   root_dir = ROOT_DIR;
@@ -185,12 +191,14 @@ void LIVMapper::initializeFiles()
 
 void LIVMapper::initializeSubscribersAndPublishers(ros::NodeHandle &nh, image_transport::ImageTransport &it) 
 {
+  // step: 1 lidar, imu, image 订阅
   sub_pcl = p_pre->lidar_type == AVIA ? 
             nh.subscribe(lid_topic, 200000, &LIVMapper::livox_pcl_cbk, this): 
             nh.subscribe(lid_topic, 200000, &LIVMapper::standard_pcl_cbk, this);
   sub_imu = nh.subscribe(imu_topic, 200000, &LIVMapper::imu_cbk, this);
   sub_img = nh.subscribe(img_topic, 200000, &LIVMapper::img_cbk, this);
   
+  // step: 2 发布
   pubLaserCloudFullRes = nh.advertise<sensor_msgs::PointCloud2>("/cloud_registered", 100);
   pubNormal = nh.advertise<visualization_msgs::MarkerArray>("visualization_marker", 100);
   pubSubVisualMap = nh.advertise<sensor_msgs::PointCloud2>("/cloud_visual_sub_map_before", 100);
@@ -708,7 +716,9 @@ void LIVMapper::standard_pcl_cbk(const sensor_msgs::PointCloud2::ConstPtr &msg)
 
 void LIVMapper::livox_pcl_cbk(const livox_ros_driver::CustomMsg::ConstPtr &msg_in)
 {
+  // step: 1 雷达使能
   if (!lidar_en) return;
+  
   mtx_buffer.lock();
   livox_ros_driver::CustomMsg::Ptr msg(new livox_ros_driver::CustomMsg(*msg_in));
   // if ((abs(msg->header.stamp.toSec() - last_timestamp_lidar) > 0.2 && last_timestamp_lidar > 0) || sync_jump_flag)

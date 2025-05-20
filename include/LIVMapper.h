@@ -26,9 +26,13 @@ class LIVMapper
 public:
   LIVMapper(ros::NodeHandle &nh);
   ~LIVMapper();
+
+  // api: 初始化订阅发布
   void initializeSubscribersAndPublishers(ros::NodeHandle &nh, image_transport::ImageTransport &it);
   void initializeComponents();
   void initializeFiles();
+  
+  // api: 主循环
   void run();
   void gravityAlignment();
   void handleFirstFrame();
@@ -45,9 +49,13 @@ public:
   void pointBodyToWorld(const PointType &pi, PointType &po);
  
   void RGBpointBodyToWorld(PointType const *const pi, PointType *const po);
+  // api: pcl类型雷达回调
   void standard_pcl_cbk(const sensor_msgs::PointCloud2::ConstPtr &msg);
+  // api: livox雷达回调
   void livox_pcl_cbk(const livox_ros_driver::CustomMsg::ConstPtr &msg_in);
+  // api: imu回调
   void imu_cbk(const sensor_msgs::Imu::ConstPtr &msg_in);
+  // api: 相机回调
   void img_cbk(const sensor_msgs::ImageConstPtr &msg_in);
   void publish_img_rgb(const image_transport::Publisher &pubImage, VIOManagerPtr vio_manager);
   void publish_frame_world(const ros::Publisher &pubLaserCloudFullRes, VIOManagerPtr vio_manager);
