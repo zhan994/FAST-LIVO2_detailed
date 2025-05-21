@@ -24,7 +24,7 @@ preprocess:
   point_filter_num: 1
   filter_size_surf: 0.1
   lidar_type: 1 # Livox Avia LiDAR
-  scan_line: 6
+  scan_line: 4
   blind: 0.8
 
 vio:
