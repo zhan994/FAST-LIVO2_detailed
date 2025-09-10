@@ -72,6 +72,14 @@
     "typeindex": "cpp",
     "typeinfo": "cpp",
     "variant": "cpp",
-    "strstream": "cpp"
+    "strstream": "cpp",
+    "any": "cpp",
+    "codecvt": "cpp",
+    "forward_list": "cpp",
+    "regex": "cpp",
+    "future": "cpp",
+    "shared_mutex": "cpp",
+    "cfenv": "cpp",
+    "valarray": "cpp"
   }
 }

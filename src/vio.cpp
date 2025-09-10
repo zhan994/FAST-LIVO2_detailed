@@ -40,8 +40,10 @@ void VIOManager::setLidarToCameraExtrinsic(vector<double> &R, vector<double> &P)
 
 void VIOManager::initializeVIO()
 {
+  // step: 1 初始化视觉子图
   visual_submap = new SubSparseMap;
 
+  // step: 2 初始化相机参数
   fx = cam->fx();
   fy = cam->fy();
   cx = cam->cx();
@@ -50,13 +52,16 @@ void VIOManager::initializeVIO()
 
   printf("intrinsic: %.6lf, %.6lf, %.6lf, %.6lf\n", fx, fy, cx, cy);
 
+  // step: 3 图像尺寸
   width = cam->width();
   height = cam->height();
-
   printf("width: %d, height: %d, scale: %f\n", width, height, image_resize_factor);
+
+  // step: 4 初始化相机对于IMU外参
   Rci = Rcl * Rli;
   Pci = Rcl * Pli + Pcl;
 
+  // step: 5 计算相关的雅可比
   V3D Pic;
   M3D tmp;
   Jdphi_dR = Rci;
@@ -64,6 +69,7 @@ void VIOManager::initializeVIO()
   tmp << SKEW_SYM_MATRX(Pic);
   Jdp_dR = -Rci * tmp;
 
+  // step: 6 
   if (grid_size > 10)
   {
     grid_n_width = ceil(static_cast<double>(width / grid_size));

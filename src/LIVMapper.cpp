@@ -32,14 +32,14 @@ LIVMapper::LIVMapper(ros::NodeHandle &nh)
   loadVoxelConfig(nh, voxel_config);
 
   // step: 5 点云重置
-  visual_sub_map.reset(new PointCloudXYZI());   // 视觉子图
-  feats_undistort.reset(new PointCloudXYZI());  // 去畸变点云
-  feats_down_body.reset(new PointCloudXYZI());  // 机体系下降采样点云
-  feats_down_world.reset(new PointCloudXYZI()); // 世界系下降采样点云
-  pcl_w_wait_pub.reset(new PointCloudXYZI());   // 等待发布世界系点云
-  pcl_wait_pub.reset(new PointCloudXYZI());     // 等待发布机体系点云
-  pcl_wait_save.reset(new PointCloudXYZRGB());  // 等待保存RGB点云
-  pcl_wait_save_intensity.reset(new PointCloudXYZI()); // 等待保存强度点云
+  visual_sub_map.reset(new PointCloudXYZI());   /// 视觉子图
+  feats_undistort.reset(new PointCloudXYZI());  /// 去畸变点云
+  feats_down_body.reset(new PointCloudXYZI());  /// 机体系下降采样点云
+  feats_down_world.reset(new PointCloudXYZI()); /// 世界系下降采样点云
+  pcl_w_wait_pub.reset(new PointCloudXYZI());   /// 等待发布世界系点云
+  pcl_wait_pub.reset(new PointCloudXYZI());     /// 等待发布机体系点云
+  pcl_wait_save.reset(new PointCloudXYZRGB());  /// 等待保存RGB点云
+  pcl_wait_save_intensity.reset(new PointCloudXYZI()); /// 等待保存强度点云
 
   // step: 6 初始化voxelmap管理器
   voxelmap_manager.reset(new VoxelMapManager(voxel_config, voxel_map));
@@ -76,9 +76,9 @@ void LIVMapper::readParameters(ros::NodeHandle &nh) {
   nh.param<bool>("vio/raycast_en", raycast_en, false);
   nh.param<bool>("vio/exposure_estimate_en", exposure_estimate_en, true);
   nh.param<double>("vio/inv_expo_cov", inv_expo_cov, 0.2);
-  nh.param<int>("vio/grid_size", grid_size, 5); // yaml未定，默认每个grid大小5
+  nh.param<int>("vio/grid_size", grid_size, 5); /// yaml未定，默认每个grid大小5
   nh.param<int>("vio/grid_n_height", grid_n_height,
-                17); // yaml未定，默认图像高度方向上有17个grid
+                17); /// yaml未定，默认图像高度方向上有17个grid
   nh.param<int>("vio/patch_pyrimid_level", patch_pyrimid_level, 3);
   nh.param<int>("vio/patch_size", patch_size, 8);
   nh.param<double>("vio/outlier_threshold", outlier_threshold, 1000);
@@ -88,7 +88,7 @@ void LIVMapper::readParameters(ros::NodeHandle &nh) {
   nh.param<double>("time_offset/img_time_offset", img_time_offset, 0.0);
   nh.param<double>("time_offset/imu_time_offset", imu_time_offset, 0.0);
   nh.param<double>("time_offset/lidar_time_offset", lidar_time_offset,
-                   0.0); // yaml未定，默认0
+                   0.0); /// yaml未定，默认0
 
   // step: uav参数
   nh.param<bool>("uav/imu_rate_odom", imu_prop_enable, false);
@@ -114,7 +114,7 @@ void LIVMapper::readParameters(ros::NodeHandle &nh) {
   nh.param<int>("preprocess/scan_line", p_pre->N_SCANS, 6);
   nh.param<int>("preprocess/point_filter_num", p_pre->point_filter_num, 3);
   nh.param<bool>("preprocess/feature_extract_enabled", p_pre->feature_enabled,
-                 false); // yaml未定，默认不提取特征
+                 false); /// yaml未定，默认不提取特征
 
   // step: pcd_save参数
   nh.param<int>("pcd_save/interval", pcd_save_interval, -1);
@@ -160,41 +160,49 @@ void LIVMapper::initializeComponents() {
     throw std::runtime_error("Camera model not correctly specified.");
 
   // step: 4 vio参数配置
-  vio_manager->grid_size = grid_size;
-  vio_manager->patch_size = patch_size;
-  vio_manager->outlier_threshold = outlier_threshold;
-  vio_manager->setImuToLidarExtrinsic(extT, extR);
-  vio_manager->setLidarToCameraExtrinsic(cameraextrinR, cameraextrinT);
-  vio_manager->state = &_state;
-  vio_manager->state_propagat = &state_propagat;
-  vio_manager->max_iterations = max_iterations;
-  vio_manager->img_point_cov = IMG_POINT_COV;
-  vio_manager->normal_en = normal_en;
-  vio_manager->inverse_composition_en = inverse_composition_en;
-  vio_manager->raycast_en = raycast_en;
-  vio_manager->grid_n_width = grid_n_width;
-  vio_manager->grid_n_height = grid_n_height;
-  vio_manager->patch_pyrimid_level = patch_pyrimid_level;
-  vio_manager->exposure_estimate_en = exposure_estimate_en;
-  vio_manager->colmap_output_en = colmap_output_en;
+  vio_manager->grid_size = grid_size; /// 单个栅格边的像素数量，默认5
+  vio_manager->patch_size = patch_size;               /// 图像块边长大小
+  vio_manager->outlier_threshold = outlier_threshold; /// 块像素光度误差离群阈值
+  vio_manager->setImuToLidarExtrinsic(extT, extR); /// 雷达外参
+  vio_manager->setLidarToCameraExtrinsic(cameraextrinR,
+                                         cameraextrinT); /// 相机外参
+  vio_manager->state = &_state; /// 当前系统的状态，更新
+  vio_manager->state_propagat = &state_propagat; /// 状态的传播量，预测
+  vio_manager->max_iterations = max_iterations;  /// 最大迭代次数
+  vio_manager->img_point_cov = IMG_POINT_COV;    /// 图像点观测协方差
+  vio_manager->normal_en = normal_en;            /// 是否有法向量
+  vio_manager->inverse_composition_en = inverse_composition_en; // 是否逆合成
+  vio_manager->raycast_en = raycast_en; /// 是否光线投射
+  vio_manager->grid_n_width = grid_n_width; /// 图像宽度方向上有多少个grid
+  vio_manager->grid_n_height = grid_n_height; /// 图像高度方向上有多少个grid
+  vio_manager->patch_pyrimid_level = patch_pyrimid_level; /// 图像金字塔层数
+  vio_manager->exposure_estimate_en = exposure_estimate_en; /// 是否估计曝光时间
+  vio_manager->colmap_output_en = colmap_output_en; /// 是否保存colmap格式
   vio_manager->initializeVIO();
 
   // step: 5 imu process参数设置
-  p_imu->set_extrinsic(extT, extR);
-  p_imu->set_gyr_cov_scale(V3D(gyr_cov, gyr_cov, gyr_cov));
-  p_imu->set_acc_cov_scale(V3D(acc_cov, acc_cov, acc_cov));
-  p_imu->set_inv_expo_cov(inv_expo_cov);
-  p_imu->set_gyr_bias_cov(V3D(0.0001, 0.0001, 0.0001));
-  p_imu->set_acc_bias_cov(V3D(0.0001, 0.0001, 0.0001));
-  p_imu->set_imu_init_frame_num(imu_int_frame);
+  p_imu->set_extrinsic(extT, extR);                         /// 雷达外参
+  p_imu->set_gyr_cov_scale(V3D(gyr_cov, gyr_cov, gyr_cov)); /// 陀螺仪协方差
+  p_imu->set_acc_cov_scale(V3D(acc_cov, acc_cov, acc_cov)); /// 加速度计协方差
+  p_imu->set_inv_expo_cov(inv_expo_cov); /// 曝光时间协方差
+  p_imu->set_gyr_bias_cov(V3D(0.0001, 0.0001, 0.0001)); /// 陀螺仪偏置协方差
+  p_imu->set_acc_bias_cov(V3D(0.0001, 0.0001, 0.0001)); /// 加速度计偏置协方差
+  p_imu->set_imu_init_frame_num(imu_int_frame); /// 初始化imu数据帧数
 
   // step: 6 使能开关
+  /// 是否使用imu
   if (!imu_en)
     p_imu->disable_imu();
+
+  /// 是否估计重力
   if (!gravity_est_en)
     p_imu->disable_gravity_est();
+
+  /// 是否估计imu偏置
   if (!ba_bg_est_en)
     p_imu->disable_bias_est();
+
+  /// 是否估计曝光时间
   if (!exposure_estimate_en)
     p_imu->disable_exposure_est();
 
@@ -250,8 +258,8 @@ void LIVMapper::initializeSubscribersAndPublishers(
   sub_img = nh.subscribe(img_topic, 200000, &LIVMapper::img_cbk, this);
 
   // step: 2 发布
-  pubLaserCloudFullRes =
-      nh.advertise<sensor_msgs::PointCloud2>("/cloud_registered", 100);
+  pubLaserCloudFullRes = nh.advertise<sensor_msgs::PointCloud2>(
+      "/cloud_registered", 100); /// VIO更新后发布世界系当前点云，LIVO为彩色点云
   pubNormal = nh.advertise<visualization_msgs::MarkerArray>(
       "visualization_marker", 100);
   pubSubVisualMap = nh.advertise<sensor_msgs::PointCloud2>(
@@ -259,9 +267,9 @@ void LIVMapper::initializeSubscribersAndPublishers(
   pubLaserCloudEffect =
       nh.advertise<sensor_msgs::PointCloud2>("/cloud_effected", 100);
   pubLaserCloudMap = nh.advertise<sensor_msgs::PointCloud2>("/Laser_map", 100);
-  pubOdomAftMapped =
-      nh.advertise<nav_msgs::Odometry>("/aft_mapped_to_init", 10);
-  pubPath = nh.advertise<nav_msgs::Path>("/path", 10);
+  pubOdomAftMapped = nh.advertise<nav_msgs::Odometry>(
+      "/aft_mapped_to_init", 10); /// 发布LIO更新后的位姿
+  pubPath = nh.advertise<nav_msgs::Path>("/path", 10); /// 发布LIO更新后的路径
   plane_pub = nh.advertise<visualization_msgs::Marker>("/planner_normal", 1);
   voxel_pub = nh.advertise<visualization_msgs::MarkerArray>("/voxels", 1);
   pubLaserCloudDyn = nh.advertise<sensor_msgs::PointCloud2>("/dyn_obj", 100);
@@ -283,7 +291,7 @@ void LIVMapper::initializeSubscribersAndPublishers(
 void LIVMapper::handleFirstFrame() {
   if (!is_first_frame) {
     _first_lidar_time = LidarMeasures.last_lio_update_time;
-    p_imu->first_lidar_time = _first_lidar_time; // Only for IMU data log
+    p_imu->first_lidar_time = _first_lidar_time; /// Only for IMU data log
     is_first_frame = true;
     cout << "FIRST LIDAR FRAME!" << endl;
   }
@@ -630,21 +638,33 @@ void LIVMapper::savePCD() {
 }
 
 void LIVMapper::run() {
+  // step: 1 循环频率
   ros::Rate rate(5000);
+
+  // step: 2 主循环
   while (ros::ok()) {
+    // step: 2.1 检查和执行回调队列的函数
     ros::spinOnce();
+
+    // step: 2.2 同步数据包
     if (!sync_packages(LidarMeasures)) {
       rate.sleep();
       continue;
     }
+
+    // step: 2.3 处理第一帧
     handleFirstFrame();
 
+    // step: 2.4 进行ESIKF前向和激光反向传播去畸变
     processImu();
 
     // if (!p_imu->imu_time_init) continue;
 
+    // step: 2.5 状态估计和建图，顺序执行LIO和VIO
     stateEstimationAndMapping();
   }
+
+  // step: 3 退出前保存pcd
   savePCD();
 }
 
@@ -1055,6 +1075,7 @@ bool LIVMapper::sync_packages(LidarMeasureGroup &meas) {
     // double t0 = omp_get_wtime();
     switch (last_lio_vio_flg) {
     // double img_capture_time = meas.lidar_frame_beg_time + exposure_time_init;
+    // note: WAIT case不包含break，将顺序执行VIO case
     case WAIT:
     case VIO: {
       // printf("!!! meas.lio_vio_flg: %d \n", meas.lio_vio_flg);
