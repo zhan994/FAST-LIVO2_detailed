@@ -7,13 +7,12 @@ common:
   ros_driver_bug_fix: false
 
 extrin_calib:
-  extrinsic_T: [-0.011, -0.02329, 0.04412]
+  extrinsic_T: [0.04165, 0.02326, -0.0284]
   extrinsic_R: [1, 0, 0, 0, 1, 0, 0, 0, 1]
-  Rcl: [-0.01029,-0.99995,-0.00121,
-        0.24427,-0.00134,-0.96971,
-        0.96965,-0.01027,0.24427] 
-  Pcl: [0.01740, -0.10971, -0.02898]
-   
+  Rcl: [ -0.017530, -0.999738, -0.014740,
+          0.003424,  0.014682, -0.999886,
+          0.999840, -0.017579,  0.003166]
+  Pcl: [  0.009816,  0.055631,  0.060371]
 
 time_offset: 
   imu_time_offset: 0.0
@@ -24,7 +23,7 @@ preprocess:
   point_filter_num: 1
   filter_size_surf: 0.1
   lidar_type: 1 # Livox Avia LiDAR
-  scan_line: 4
+  scan_line: 6
   blind: 0.8
 
 vio:
